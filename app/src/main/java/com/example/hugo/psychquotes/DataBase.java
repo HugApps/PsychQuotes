@@ -73,20 +73,26 @@ public class DataBase extends SQLiteOpenHelper {
 
 
     public boolean removeQuote(String tag){
-        String query =" SELECT * FROM Quotes WHERE Quotes.Tag=?" +tag+"'";
+
+
+        String query =" SELECT * FROM Quotes WHERE Quotes.Tag='" +tag+"'";
         SQLiteDatabase db=this.getWritableDatabase();
-        Cursor Cursor = db.rawQuery(query,null);
-        if(Cursor.moveToFirst()){
-            db.delete("Quotes",tag+"=Quotes.Tag",null);
-            Cursor.close();
-
-            db.close();
-            return true;
-        }
-        else{
-            return false;}
 
 
+
+            Cursor Cursor = db.rawQuery(query, null);
+            if (Cursor.moveToFirst()) {
+                db.delete("Quotes", "'tag'" + "=Quotes.Tag", null);
+                 Cursor.close();
+
+                db.close();
+                return true;
+            }
+
+
+
+
+        return false;
     }
 
 
@@ -112,7 +118,7 @@ public class DataBase extends SQLiteOpenHelper {
 
 
     public ArrayList<String> FetchAllSaved(){
-        String query = "SELECT Quotes.Tag , Quotes.Quote FROM Quotes";
+        String query = "SELECT Tag , Quote FROM Quotes";
         ArrayList<String> allquotes = new ArrayList<String>();
 
         SQLiteDatabase db= this.getWritableDatabase();

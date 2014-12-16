@@ -53,12 +53,12 @@ public class SaveFragment extends Fragment {
                 else{
                     if(CreateTag()){
                         status.setText("success");
-
+                        Display.setText( dataBank.getQuote(inputbox.getText().toString()));
 
                        // getActivity().onBackPressed();
                     }else{
                         status.setText("fail");
-                        Display.setText( dataBank.getQuote(inputbox.getText().toString()));
+
 
                     }
 
@@ -76,8 +76,11 @@ public class SaveFragment extends Fragment {
             @Override
             // return to main activity. or main fragment//
             public void onClick(View v) {
+                if(dataBank.removeQuote(inputbox.getText().toString())){
+                    status.setText("success");
 
-                getActivity().onBackPressed();
+                }else{
+                getActivity().onBackPressed();}
 
             }
 

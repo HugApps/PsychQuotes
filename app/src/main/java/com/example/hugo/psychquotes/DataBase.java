@@ -3,9 +3,12 @@ package com.example.hugo.psychquotes;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.sql.SQLDataException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
@@ -26,7 +29,7 @@ public class DataBase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db){
         String table1 = " CREATE TABLE Quotes( Tag TEXT PRIMARY KEY , Quote Text , Type TEXT);";
         db.execSQL(table1);
-        db.close();
+
 
         // use db.execSQL(string) to execute a sql statement, to create tables
 
@@ -45,15 +48,22 @@ public class DataBase extends SQLiteOpenHelper {
     //add methods + get query methods //
 
 
-    public void addQuote ( String tag, String quote, String type ) {
+    public boolean addQuote ( String tag, String quote, String type ) {
         ContentValues values = new ContentValues();
         values.put("Tag",tag);
         values.put("Quote",quote);
         values.put("Type",type);
 
         SQLiteDatabase db= this.getWritableDatabase();
-        db.insert("Quotes",null,values);
+
+        try {
+            db.insertOrThrow("Quotes", null, values);
+        }
+        catch(SQLiteConstraintException e){
+            return false;}
+
         db.close();
+        return true;
 
 
 
@@ -63,7 +73,7 @@ public class DataBase extends SQLiteOpenHelper {
 
 
     public boolean removeQuote(String tag){
-        String query =" SELECT * FROM Quotes WHERE" + tag+"=Quotes.Tag;";
+        String query =" SELECT * FROM Quotes WHERE Quotes.Tag=?" +tag+"'";
         SQLiteDatabase db=this.getWritableDatabase();
         Cursor Cursor = db.rawQuery(query,null);
         if(Cursor.moveToFirst()){
@@ -83,7 +93,7 @@ public class DataBase extends SQLiteOpenHelper {
      public String getQuote(String tag){
 
         String output="";
-        String query = " Select Quotes.Quote FROM Quotes WHERE" + tag + "=Quotes.Tag;";
+        String query = " Select Quotes.Quote FROM Quotes WHERE Quotes.Tag ='"+tag+"'";
         int column=0;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor Cursor = db.rawQuery(query,null);

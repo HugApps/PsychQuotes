@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 /**
  * Created by Hugo on 12/14/2014.
@@ -21,6 +22,7 @@ public class SaveFragment extends Fragment {
     EditText inputbox;
     Button save;
     Button cancel;
+    TextView status,Display;
     String Quote;
     int index;
     DataBase dataBank;
@@ -29,9 +31,11 @@ public class SaveFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.savescreen, container, false);
+        status=(TextView)v.findViewById(R.id.SaveTitle);
         inputbox = (EditText) v.findViewById(R.id.SaveTag);
+        Display=(TextView)v.findViewById(R.id.Display);
         dataBank=new DataBase(getActivity(),"Quotes",null,1);
-       this.Quote=getArguments().getString("q");
+        this.Quote=getArguments().getString("q");
         this.index=getArguments().getInt("i");
 
 
@@ -40,16 +44,29 @@ public class SaveFragment extends Fragment {
             @Override
             //This should save the Tag and add it to a database//
             public void onClick(View v) {
-                if(Quote == null || inputbox.getText()==null){
-                 //say saved failed
-                getActivity().onBackPressed();}
+
+                if(Quote == null || inputbox.getText()==null) {
+                    status.setText("Fail");
+
+                }
 
                 else{
-                    CreateTag();
+                    if(CreateTag()){
+                        status.setText("success");
+
+
+                       // getActivity().onBackPressed();
+                    }else{
+                        status.setText("fail");
+                        Display.setText( dataBank.getQuote(inputbox.getText().toString()));
+
+                    }
+
+                    }
                 }
 
 
-            }
+
         });
 
 
@@ -66,14 +83,15 @@ public class SaveFragment extends Fragment {
 
 
         });
-        return inflater.inflate(R.layout.savescreen, container, false);
+        return v;
 
 
     }
 
 
-    public  void CreateTag (){
+    public  boolean CreateTag (){
         String type="";
+        boolean success=true;
         switch(index){
 
             case 0 : type="Success";
@@ -87,8 +105,9 @@ public class SaveFragment extends Fragment {
                     break;
         }
 
-        dataBank.addQuote(inputbox.getText().toString(),Quote,type);
-        dataBank.close();
+        success= dataBank.addQuote(inputbox.getText().toString(),Quote,type);
+
+        return success;
     }
        // someSQL lite?
 

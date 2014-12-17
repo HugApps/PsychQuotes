@@ -73,26 +73,12 @@ public class DataBase extends SQLiteOpenHelper {
 
 
     public boolean removeQuote(String tag){
-
-
-        String query =" SELECT * FROM Quotes WHERE Quotes.Tag='" +tag+"'";
+        String query =" SELECT * FROM Quotes WHERE Quotes.Tag=?" +tag+"'";
         SQLiteDatabase db=this.getWritableDatabase();
 
 
-
-            Cursor Cursor = db.rawQuery(query, null);
-            if (Cursor.moveToFirst()) {
-                db.delete("Quotes", "'tag'" + "=Quotes.Tag", null);
-                 Cursor.close();
-
-                db.close();
-                return true;
-            }
-
-
-
-
-        return false;
+        String[] args=new String[]{tag};
+        return db.delete("Quotes","Tag=?",args) >0;
     }
 
 
@@ -117,20 +103,20 @@ public class DataBase extends SQLiteOpenHelper {
     }
 
 
-    public ArrayList<String> FetchAllSaved(){
-        String query = "SELECT Tag , Quote FROM Quotes";
+    public Cursor FetchAllSaved(){
+        String query = "SELECT Tag as _id FROM Quotes";
         ArrayList<String> allquotes = new ArrayList<String>();
-
+        Cursor out;
         SQLiteDatabase db= this.getWritableDatabase();
         Cursor cursor= db.rawQuery(query,null);
-        int i=0;
-        while(cursor.moveToNext()){
-            i=cursor.getColumnIndex("Quote");
-            allquotes.add(cursor.getString(i));
-        }
-         cursor.close();
-         db.close();
-         return allquotes;
+        out=cursor;
+       // int i=0;
+       // while(cursor.moveToNext()){
+          //  i=cursor.getColumnIndex("Quote");
+           // allquotes.add(cursor.getString(i));
+       // }
+
+         return out;
     }
 
 

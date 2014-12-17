@@ -36,9 +36,10 @@ public class JSONRead {
    static JSONObject Jo = null;
    static String json ="a";
 
-
+   private boolean status= true;
    public JSONRead (){}
 
+    public boolean getStatus(){return status;}
 
     public JSONObject getJSONFromUrl(final String url) {
 
@@ -72,11 +73,11 @@ public class JSONRead {
 
         } catch (ClientProtocolException e) {
 
-            e.printStackTrace();
+
 
         } catch (IOException e) {
+            this.status=false;
 
-            e.printStackTrace();
 
         }
 

@@ -6,6 +6,9 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.MotionEventCompat;
@@ -15,7 +18,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
@@ -29,11 +35,14 @@ import java.util.HashMap;
 
 
 public class MainMenu extends Activity implements ViewSwitcher.ViewFactory {
+    ConnectivityManager ConnectManager;
     GestureDetector listen;
-    GestureDetector listen2;
+    Spinner Menu;
     String[] quotes ;
+    ArrayList<String> covers;
     int index;
     String Tag;
+    Boolean netConnection=false;
     LoadQuotes daily;
     TextView temp;
     TextSwitcher switcher ;
@@ -45,13 +54,59 @@ public class MainMenu extends Activity implements ViewSwitcher.ViewFactory {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_menu2);
-
+        setContentView(R.layout.activity_main_menu);
+        //URL for database php file//
         url="http://psych2go.org/php/getquote.php";
+        //Array to store sub category types of Quotes//
         quotes = new String[4];
+        //Drop down menu set up//
+        Menu= (Spinner)findViewById(R.id.Menu);
+        covers= new ArrayList<String>();
+        covers.add("Need Inspiration");
+        covers.add("Need Advice?");
+        covers.add("Need the Extra push?");
+        covers.add("Need Inspiration?");
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.DropMenu,android.R.layout.simple_dropdown_item_1line);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        Menu.setAdapter(adapter);
+        ConnectManager= (ConnectivityManager)this.getSystemService(this.CONNECTIVITY_SERVICE);
 
 
+       Menu.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+           @Override
+           public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+             //  TextView itemvalue =(TextView)view.getItemAtPosition(position);
+
+               switch (position){
+
+                   case 0:
+                           break;
+
+                   case 1:
+                       final FragmentManager LoadFrag = getFragmentManager();
+                       final FragmentTransaction fragmentTransder = LoadFrag.beginTransaction();
+                       Fragment Load = new LoadPage();
+
+                       fragmentTransder.addToBackStack("Load");
+                       fragmentTransder.add(R.id.MainFrag, Load, "Load");
+
+
+                       fragmentTransder.commit();
+                       break;
+                   }
+
+
+
+
+           }
+
+           @Override
+           public void onNothingSelected(AdapterView<?> parent) {return;
+
+           }
+       });
         // quote =(TextView)findViewById(R.id.QuoteDisplay);
+        //Sliding interface setupp//
         switcher = (TextSwitcher) findViewById(R.id.DailyQuote);
         v = switcher;
         switcher.setFactory(this);
@@ -83,15 +138,24 @@ public class MainMenu extends Activity implements ViewSwitcher.ViewFactory {
 
 
         class mydetector extends GestureDetector.SimpleOnGestureListener {
+
             @Override
             public boolean onDown(MotionEvent e){
                 return true;
             }
 
             @Override
+            public void onLongPress(MotionEvent e){
+                if(checkConnection()){
+                switcher.setText(quotes[index]);}
+
+            }
+
+            @Override
             // detect horizitonal fling, change text according to index
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 // if swipe left, decrement index and load value
+
 
                 if (e2.getX() < e1.getX() ) {
                 index--;
@@ -100,7 +164,7 @@ public class MainMenu extends Activity implements ViewSwitcher.ViewFactory {
                     return true;
                 }
 
-                switcher.setText(quotes[0]);
+                switcher.setText(covers.get(index));
                 switcher.setBackgroundColor(Color.DKGRAY);
                 temp=(TextView)switcher.getChildAt(0);
                 temp.setTextColor(Color.WHITE);
@@ -116,7 +180,7 @@ public class MainMenu extends Activity implements ViewSwitcher.ViewFactory {
                             index = 0;
                             return true;
                         }
-                            switcher.setText(quotes[index]);
+                            switcher.setText(covers.get(index));
                             switcher.setBackgroundColor(Color.WHITE);
                              temp=(TextView)switcher.getChildAt(0);
                              temp.setTextColor(Color.BLACK);
@@ -134,14 +198,22 @@ public class MainMenu extends Activity implements ViewSwitcher.ViewFactory {
             }
 
 
+
+
+
+
+
+
             public boolean onDoubleTap(MotionEvent e){
-
-
+                temp=(TextView)switcher.getChildAt(0);
+                if(covers.contains(temp.getText().toString())){
+                    return true;
+                }
                 final FragmentManager saveFrag= getFragmentManager();
                 final FragmentTransaction fragmentTransder = saveFrag.beginTransaction();
                 Fragment save = new SaveFragment();
                 save.setArguments(SaveQuote());
-                fragmentTransder.add(R.id.container,save,"save");
+                fragmentTransder.add(R.id.Frag,save,"save");
                 fragmentTransder.addToBackStack("save");
                 fragmentTransder.commit();
                 return true;
@@ -194,6 +266,7 @@ public Bundle SaveQuote (){
 
 
 
+
         return t;
 
 
@@ -206,69 +279,85 @@ public Bundle SaveQuote (){
 
 
         @Override
-        protected  void onPreExecute(){}
-
+        protected void onPreExecute() {
+        }
 
 
         @Override
-          protected Boolean doInBackground(Void... arg0){
+        protected Boolean doInBackground(Void... arg0) {
 
-         // ArrayList  QuoteList = new ArrayList<HashMap<String,String>>();
-                //call json parser//
+            // ArrayList  QuoteList = new ArrayList<HashMap<String,String>>();
+            //call json parser//
 
-           JSONRead reader = new JSONRead();
+            // Fail here means no internet connection//
+            try {
+                JSONRead reader = new JSONRead();
 
-           JSONObject json =reader.getJSONFromUrl(url);
-
-           try {
-               Jsonarray = json.getJSONArray("posts");
-
+                JSONObject json = reader.getJSONFromUrl(url);
 
 
-
-               for (int i= 0; i < Jsonarray.length(); i++) {
-                   JSONObject c = Jsonarray.getJSONObject(i);
-                   quotes[0] = c.getString("Daily");
-                   quotes[1]= c.getString("Love");
-                   quotes[2]= c.getString("Motivation");
-                   quotes[3]= c.getString("Inspiration");
-                  // HashMap<String, String> map = new HashMap<String, String>();
-
-                  // map.put("quote", quotes[0]);
-                   //QuoteList.add(map);
-               }
-
-           }catch (JSONException e){
-                e.printStackTrace();
-           }
+                if (json.getJSONArray("posts") != null) {
+                    Jsonarray = json.getJSONArray("posts");
+                } else {
+                    netConnection = false;
+                    return false;
+                }
 
 
+                for (int i = 0; i < Jsonarray.length(); i++) {
+                    JSONObject c = Jsonarray.getJSONObject(i);
+                    quotes[0] = c.getString("Daily");
+                    quotes[1] = c.getString("Love");
+                    quotes[2] = c.getString("Motivation");
+                    quotes[3] = c.getString("Inspiration");
+                    // HashMap<String, String> map = new HashMap<String, String>();
+
+                    // map.put("quote", quotes[0]);
+                    //QuoteList.add(map);
+                }
+
+            } catch (JSONException e) {
+                netConnection = false;
+                return null;
+            }
 
 
-
+            netConnection = true;
             return null;
 
-            }
+        }
+
         @Override
-        protected void onPostExecute(Boolean result){
+        protected void onPostExecute(Boolean result) {
             super.onPostExecute(result);
             //update displays//
 
 
-
-
-            }
-
-
-
+        }
 
     }
+
+public Boolean checkConnection(){
+    NetworkInfo WifiInfo =ConnectManager.getNetworkInfo(ConnectManager.TYPE_WIFI);
+    NetworkInfo DataInfo =ConnectManager.getNetworkInfo(ConnectManager.TYPE_MOBILE);
+
+    return WifiInfo.isConnected()|| DataInfo.isConnected();
+
+
+
+
+
+}
+
+
+
 
 
     @Override
     protected void onResume(){
         super.onResume();
-        new LoadQuotes().execute();
+        if(checkConnection()){
+        new LoadQuotes().execute();}
     }
 
 

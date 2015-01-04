@@ -35,6 +35,7 @@ public class JSONRead {
    static InputStream is =null;
    static JSONObject Jo = null;
    static String json ="a";
+   int json2;
 
    private boolean status= true;
    public JSONRead (){}
@@ -70,6 +71,7 @@ public class JSONRead {
         } catch (UnsupportedEncodingException e) {
 
             e.printStackTrace();
+            this.status=false;
 
         } catch (ClientProtocolException e) {
 
@@ -119,8 +121,11 @@ public class JSONRead {
 
             json = sb.toString();
 
-        } catch (Exception e) {
+            //json2=Integer.parseInt(json);
 
+
+        } catch (Exception e) {
+            this.status=false;
             Log.e("Buffer Error", "Error converting result " + e.toString());
 
         }
@@ -132,10 +137,10 @@ public class JSONRead {
         try {
 
             Jo = new JSONObject(json);
-
+            Log.d("hmm",json);
         } catch (JSONException e) {
-
-            Log.e("JSON Parser", "Error parsing data " + e.toString());
+            this.status=false;
+            Log.e("JSON Parser", "Error parsing data " + json);
 
         }
 

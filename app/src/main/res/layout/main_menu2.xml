@@ -2,29 +2,45 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" tools:context="com.example.hugo.psychquotes.savescreen"
     android:id="@+id/container"
-    android:background="#ffff9903">
+    android:background="#ffe9ff98">
 
     <!-- TODO: Update blank fragment layout -->
 
 
-    <ImageButton
-        android:layout_width="108dp"
-        android:layout_height="104dp"
-        android:id="@+id/imageButton"
-        android:src="@drawable/thumb"
-        android:background="#ffff9523"
-        android:layout_weight="0.91"
-        android:layout_gravity="center_horizontal|bottom" />
+    <Spinner
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/Menu"
+        android:layout_gravity="left|top"
+        android:background="#ffffef92"
+        android:layout_weight="0.20"/>
 
     <TextSwitcher
         android:layout_width="match_parent"
-        android:layout_height="408dp"
+        android:layout_height="445dp"
         android:id="@+id/DailyQuote"
-        android:layout_gravity="left|top"
+        android:layout_gravity="center"
         android:background="#fffff5da"
-        android:layout_weight="0.45">
+        android:layout_weight="0.8">
 
     </TextSwitcher>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:id="@+id/containerTest">
+
+        <ImageButton
+            android:layout_width="108dp"
+            android:layout_height="104dp"
+            android:id="@+id/imageButton"
+            android:src="@drawable/thumb"
+            android:background="@android:color/transparent"
+
+            android:layout_gravity="center_horizontal|bottom" />
+    </LinearLayout>
 
 </FrameLayout>
 
